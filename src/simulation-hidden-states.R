@@ -9,8 +9,8 @@
 # p_initial: probability of infection on first trial
 # nc: number of cattle on a given pen.
 
-sis_sim_hidenstates <- function(samples, al, bt, m_inf,
-                                p_initial, nc){
+sis_sim_hidenstates <- function(samples, nc, al, bt, m_inf,
+                                p_initial){
   infect_status <- matrix(NA,nrow = samples, ncol = nc)
   infect_status[1,] <- rbinom(n = nc, size = 1, prob = p_initial)
   for(t in 2:samples){
