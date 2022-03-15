@@ -24,3 +24,22 @@ sis_sim_hidenstates <- function(samples, nc, al, bt, m_inf,
   return(infect_status)
 }
 
+
+sis_sim_hidenstates_pens <- function(samples, nc, np, al, bt, m_inf, p_initial){
+  infect_status <- array(data = NA, dim = c(samples, nc, np))
+  infect_status[1, , ] <- rbinom(n = nc * np, size = 1, prob = p_initial)
+  
+  for(p in 1:np){
+    for(t in 2:samples){
+      for(k in 1:nc){
+        infect_status[t,k,p] <- rbinom(n = 1, size = 1,
+                                     prob = ifelse(test = infect_status[t-1,k,p] == 0,
+                                                   yes = 1 - exp(-al - bt * sum(infect_status[(t-1), -k, p])),
+                                                   no = (m_inf - 1) / m_inf))
+      }
+    }
+  }
+  return(infect_status)
+}
+
+
