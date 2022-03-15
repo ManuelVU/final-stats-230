@@ -1,7 +1,7 @@
 # This function is design to evaluate q at the initial proposal only, after 
 # future evaluations can be taken from the backward sample algorithm
 
-evaluate_q <- function(proposal, proposal_pinfected, pen_states, id_number, id_pen, 
+evaluate_q <- function(proposal_pinfected, pen_states, id_number, id_pen, 
                        external_inf_rate, within_inf_rate, 
                        infectious_period){
   
@@ -10,7 +10,7 @@ evaluate_q <- function(proposal, proposal_pinfected, pen_states, id_number, id_p
   total_infected <- apply(X = pen_states[, -id_number, id_pen], MARGIN = 1, 
                           FUN = sum)
   
-  proposal_state <- proposal
+  proposal_state <- pen_states[, id_number, id_pen]
   
   proposal_like <- rep(0, trials)
   

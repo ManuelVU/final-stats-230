@@ -32,9 +32,9 @@ backward_sampling <- function(proposal_pinfected, pen_states, id_number, id_pen,
       c(1 / infectious_period,
         (infectious_period - 1) / infectious_period))
     
-    prob_state_t <-  transition[2,(proposal_state[t+1] + 1)] * proposal_pinfected[t] / 
-      sum(c(transition[1,(proposal_state[t+1] + 1)] * (1 - proposal_pinfected[t]),
-            transition[2,(proposal_state[t+1] + 1)] * proposal_pinfected[t]))
+    prob_state_t <-  transition[2, (proposal_state[t+1] + 1)] * proposal_pinfected[t] / 
+      sum(c(transition[1, (proposal_state[t+1] + 1)] * (1 - proposal_pinfected[t]),
+            transition[2, (proposal_state[t+1] + 1)] * proposal_pinfected[t]))
     
     proposal_state[t] <- rbinom(n = 1, size = 1, prob = prob_state_t)
     
