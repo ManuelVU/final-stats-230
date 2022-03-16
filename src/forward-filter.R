@@ -14,7 +14,7 @@ forward_filter <- function(id_number, id_pen, pen_states, external_inf_rate,
   # matrix to save filter probabilities
   filter_prob <- matrix(data = NA, nrow = trials, ncol = 2)
   
-  # matrix to save probosal mass function
+  # matrix to save proposal mass function
   proposal_mass <- matrix(data = NA, nrow = trials, ncol = 2)
   
   total_infected <- apply(X = pen_states[, -id_number, id_pen], MARGIN = 1, 

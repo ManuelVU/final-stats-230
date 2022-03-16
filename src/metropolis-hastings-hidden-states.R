@@ -60,14 +60,14 @@ mh_chain <- function(current_chains, tests_rams, tests_fec, cattle, pen, theta,
   a <- min(0, log_q_current - log_q_proposal + log_pi_proposal - log_pi_current)
   
   if(log_u <= a){
-    post_sample <- proposed_chain,
+    post_sample <- proposed_chain
     log_q <- log_q_proposal
     log_pi <- log_pi_proposal
     accepted <- 1
   }
   
   else{
-    post_sample <- current_chains,
+    post_sample <- current_chains
     log_q <- log_q_current
     log_pi <- log_pi_current
     accepted <- 0
