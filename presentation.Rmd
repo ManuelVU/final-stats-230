@@ -1,0 +1,184 @@
+---
+title: "Scalable Bayesian Inference for Coupled Hiddien Markov and Semi-Markov Models"
+subtitle: "Panayiota Touloupou, B&auml;rbel Finkenst&auml;dt and <br> Simon E. F. Spence"
+author: "Manuel Villarreal, Xuyang Zhao"
+institute: ""
+date: ""
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+class: center, middle, inverse
+
+## Outline
+
+---
+
+### Outline
+
+- Problem description
+
+--
+
+- Model - CHMM
+
+--
+
+- Existing methods
+
+--
+
+- Proposed algorithms
+
+--
+
+- Experimental setting
+
+--
+
+- Numerical experiment.
+
+---
+class: center, middle, inverse
+
+## Problem description
+
+---
+
+### Motivation:
+
+- MCMC becomes inefficient and computationally intractable due to high 
+dimensionality or complexity.
+
+--
+
+- For coupled HMM's, the existing methods are either computationally demanding 
+or they mix slowly.
+
+--
+
+### Objective:
+
+- Propose an extension of a previously described algorithm known as Forward 
+Filter Backward Sample (FFBS) to balance computational cost and improve mixing.
+
+--
+
+1. Gibbs Sampler.
+
+--
+
+1. Metropolis-Hastings sampler.
+
+---
+class: center, middle, inverse
+
+## Coupled Hidden Markov Models
+
+---
+
+### Coupled HMM's
+
+**Def.** A CHMM is a collection of many HMM's which are coupled through some temporal 
+dependency structure.
+
+--
+
+### Conditional independence assumptions
+
+1. Each observation is independent of all other states and observations given the 
+value of the hidden state.
+
+1. One hidden state is not only dependent on its own previous state but also on
+the previous state of all other chains.
+
+.pull-left[
+$$X_t^c \sim P(X_t^c | X_{t-1}^c, \boldsymbol{X}_{t-1}^{-c})$$
+$$Y_t^c \sim P(Y_t^c | X_{t}^c)$$
+]
+
+.pull-right[
+```{r, echo = FALSE, fig.align='center'}
+knitr::include_graphics(path = "images/img-1.png")
+```
+]
+
+---
+class: center, middle, inverse
+
+## Previous methods
+
+---
+
+### Full forward filtering and backward sampling (Full FFBS)
+
+- Previous methods include Bayesian analysis using MCMC.
+
+.pull-left[
+Forward filtering: Kalman filter $$\boldsymbol{X}^{1:C}_t \sim P(\boldsymbol{X}^{1:C}_t|\boldsymbol{Y}_{1:t}^{1:C},\boldsymbol{X}^{1:C}_{t+1},\boldsymbol{\theta})$$
+
+Simulate $X_T$ from the filtered probabilities $$\boldsymbol{X}^{1:C}_T \sim P(\boldsymbol{X}^{1:C}_T|\boldsymbol{Y}_{1:T}^{1:C},\boldsymbol{\theta})$$
+
+Backward sample for $t = T-1, \cdots, 1$  $$\boldsymbol{X}^{1:C}_t \sim P(\boldsymbol{X}^{1:C}_t|\boldsymbol{Y}_{1:t}^{1:C},\boldsymbol{X}^{1:C}_{t+1},\boldsymbol{\theta})$$
+
+Use MCMC to update $\boldsymbol{\theta}$: $$\boldsymbol{\theta} \sim P(\boldsymbol{\theta}|\boldsymbol{Y}_{1:T}^{1:C}, \boldsymbol{X}^{1:C}_{1:T})$$
+]
+
+.pull-right[
+```{r, echo = FALSE, fig.align='center'}
+knitr::include_graphics(path = "images/img-2.png")
+```
+]
+
+---
+
+### Existing methods 
+
+1. **Single site updates:** Draw each one of the C x T state variables from its full conditional distribution.
+  - **Complexity:** $O(TNC)$ 
+  - **Downside:** High temporal dependence leads to slow mixing of the chains.
+
+--
+
+1. **Blocks:** Propose three possible changes to blocks of state components within a single chain, based on their current values.
+  - **Downside:** Most of the hidden states are not updated and slow chain mixing. 
+
+--
+
+1. **Constructing transition matrices:** Impose a structure in each chain;s transition matrix with transition probabilities depending on covariates through logistic regression.
+  - **Advantage:** Reduce the iterations needed in comparison to full-FFBS.
+  - **Downside:** Requires the structure of transition matrices to be estimated or known in advance.
+  
+---
+class: center, middle, inverse
+
+## Proposed Methods.
+
+--
+
+### Individual FFBS GIBBS and Metropolis Hastings Samplers 
+
+---
+
+### Individual FFBS GIBBS and Metropolis Hastings Samplers
+
+- The main idea of these (and other) methods is that the hidden states $\boldsymbol{X}^{1:C}_{1:T}$ can be treated as random variables.
+
+--
+
+- Using either a Gibbs or Metropolis-Hastings algorithm we want to approximate the full joint posterior distribution conditional on the observations $\boldsymbol{Y}^{1:C}_{1:T}$. $$\pi(\boldsymbol{\theta},\boldsymbol{X}^{1:C}_{1:T}|\boldsymbol{Y}^{1:C}_{1:T}) \propto p(\boldsymbol{\theta})P(\boldsymbol{X}^{1:C}_1|\boldsymbol{\theta})\times\left[\prod_{t=2}^T \prod_{c=1}^CP(X_t^c|X_{t-1}^c,\boldsymbol{X}_{t-1}^{-c},\boldsymbol{\theta})\right]\\ \times\left[\prod_{t=1}^T \prod_{c=1}^CP(Y_t^c|X_t^c,\boldsymbol{\theta})\right]$$
+
+---
+
+### Individual FFBS
+
+
+
