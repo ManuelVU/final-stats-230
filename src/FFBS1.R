@@ -7,7 +7,7 @@
 # mu: initial probability of infection
 # ObservedR, ObservedF: Observed test results for RAMS and faecal respectively
 # thetaR, thetaF : sensitivity of the RAMS and faecal test respectively
-# OUtput of function: generated hidden states
+# @OUtput of function: generated hidden states
 FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
   #forward filtering
   I <- apply(X[-cow, ], 2, function(x) sum(x, na.rm = T))
@@ -71,14 +71,20 @@ FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
   Hstate<-c()
   # compute proposal distribution
   proposal.prob_X<-matrix(0,nrow = s,ncol = 2)
+  # Likelihood
+  likelihood<-c()
   u<-runif(1)
   if(u<=filtered.prob_X[s,1]){
     Hstate[s]<-1
-  }else{Hstate<-0}
+    likelihood[s]<-filtered.prob_X[s,1]
+  }else{
+    Hstate<-0
+    likelihood[s]<-filtered.prob_X[s,2]}
   for(i in (s-1):1){
     #transition prob 
     p00<-exp(-a-b*I[i])
     p11<-1/(m0+1)
+    
     if(Hstate[i+1]==1){    # X_{t+1} = 1
       num1<-filtered.prob_X[i,1]*p11
       num2<-filtered.prob_X[i,2]*(1-p00)
@@ -93,7 +99,11 @@ FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
     u1<-runif(1)
     if(u1<=proposal.prob_X[i,1]){
       Hstate[i]<-1
-    }else{Hstate[i]<-0}
+      likelihood[i]<-proposal.prob_X[i,1]
+    }else{
+      Hstate[i]<-0
+      likelihood[i]<-proposal.prob_X[i,2]}
   }
-  return(Hstate)
+  result<-list(Hstate,sum(log(likelihood)))
+  return(result)
 }
