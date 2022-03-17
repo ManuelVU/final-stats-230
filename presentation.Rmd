@@ -126,6 +126,8 @@ Simulate $X_T$ from the filtered probabilities $$\boldsymbol{X}^{1:C}_T \sim P(\
 Backward sample for $t = T-1, \cdots, 1$  $$\boldsymbol{X}^{1:C}_t \sim P(\boldsymbol{X}^{1:C}_t|\boldsymbol{Y}_{1:t}^{1:C},\boldsymbol{X}^{1:C}_{t+1},\boldsymbol{\theta})$$
 
 Use MCMC to update $\boldsymbol{\theta}$: $$\boldsymbol{\theta} \sim P(\boldsymbol{\theta}|\boldsymbol{Y}_{1:T}^{1:C}, \boldsymbol{X}^{1:C}_{1:T})$$
+
+Complexity of $O(TN^{2c})$.
 ]
 
 .pull-right[
