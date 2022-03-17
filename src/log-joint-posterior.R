@@ -1,16 +1,16 @@
 # This function calculates the logarithm of the joint posterior distribution, 
 # function is used as u in the hamiltonian_mc function.
 
-# transitions shoudl be organize in an array with trials, pens and then 
+# transitions should be organize in an array with trials, pens and then 
 # organized as follows: x_t-1 | x_t 
 # 0|0, 0|1, 1|0 and 1|1.
-# transitions will have dimentions trials-1, pens, 4
+# transitions will have dimensions trials-1, pens, 4
 
 # infected totals should be organized as a matrix with rows equal to the number 
 # of trials and columns equal to the number of pens.
 
 # initial_theta is the matrix of initial values foe the prior distributions, 
-# each parameter on a single row organized as alpha, beta, m. Dimentions should
+# each parameter on a single row organized as alpha, beta, m. Dimensions should
 # be 3, 2.
 
 log_joint_post <- function(cr_theta, transitions, infected_totals,
