@@ -73,11 +73,11 @@ pi_target <- function(chains, id_pen, measures_rams, measures_fec, alpha, beta,
   
   ts <- sum(transition_log)
   
-  print(ts)
+  #print(ts)
   
-  print(em)
+  #print(em)
   
-  print(priors)
+  #print(priors)
   
   return(priors + ts + em)
   
