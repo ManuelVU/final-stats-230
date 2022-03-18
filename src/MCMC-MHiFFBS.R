@@ -1,5 +1,10 @@
 ### MCMC - MH sampler
 MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini_m,ini_thetaR,ini_thetaF,ini_mu){
+  # load functions
+  source(file = "src/simulation-hidden-states.R")
+  source(file = "src/metropolis-hastings-hidden-states.R")
+  source(file = "src/hamiltonian-mc.R")
+  source(file = "src/TIP.R")
   # Initialization of parameters:
   a1<-ini_a
   b1<-ini_b
