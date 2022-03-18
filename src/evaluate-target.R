@@ -70,10 +70,21 @@ pi_target <- function(chains, id_pen, measures_rams, measures_fec, alpha, beta,
   
   ts <- sum(transition_log)
   
+<<<<<<< HEAD
   if(is.nan(priors + ts + em)){
     return(-Inf)
   }
   else{
     return(priors + ts + em)
   }
+=======
+  #print(ts)
+  
+  #print(em)
+  
+  #print(priors)
+  
+  return(priors + ts + em)
+  
+>>>>>>> 2859c6e093ec3920b64835610b123de2cc66d88d
 }
