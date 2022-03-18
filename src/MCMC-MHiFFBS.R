@@ -87,7 +87,5 @@ MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini
   return(result)
 }
 
-MCMC_MHiFFBS()
 output<-MCMC_MHiFFBS(50,100,ObservedR,ObservedF,20,8,0.02,0.03,3,0.9,0.95,0.3)
-output
 save(output, file = "data/output.Rdata")
