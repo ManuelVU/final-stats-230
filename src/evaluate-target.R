@@ -12,7 +12,7 @@ pi_target <- function(chains, id_pen, measures_rams, measures_fec, alpha, beta,
   
   priors <- sum(dgamma(x = alpha, shape = 1, rate = 1, log = TRUE), 
                 dgamma(x = beta, shape = 1, rate = 1, log = TRUE),
-                dgamma(x = m, shape = 0.01, rate = 0.01, log = TRUE),
+                dgamma(x = m - 1, shape = 0.01, rate = 0.01, log = TRUE),
                 dbeta(x = nu, shape1 = 1, shape2 = 1, log = TRUE),
                 dbeta(x = theta_r, shape1 = 1, shape2 = 1, log = TRUE),
                 dbeta(x = theta_f, shape1 = 1, shape2 = 1, log = TRUE))
@@ -44,7 +44,6 @@ pi_target <- function(chains, id_pen, measures_rams, measures_fec, alpha, beta,
                             FUN = sum)
     
     for(tt in 1:trials){
-      
       if(tt == 1){
         transition_log[tt, cc] <- log((1 - chains[tt, cc, id_pen]) * (1 - nu) + 
                                        chains[tt, cc, id_pen] * nu)
@@ -55,30 +54,26 @@ pi_target <- function(chains, id_pen, measures_rams, measures_fec, alpha, beta,
       else{
         # model probability of 0|0, 1|0; 
         #                      0|1, 1|1
-        model_transition <- rbind(
-          c(exp(-alpha - beta * total_infected[tt-1]), 1 - exp(-alpha - beta * total_infected[tt-1])),
-          c(1 / (m+1), m / (m+1)))
+        model_transition <- rbind(c(exp(-alpha - beta * total_infected[tt-1]), 
+                                    1 - exp(-alpha - beta * total_infected[tt-1])),
+                                  c(1 / (m), 
+                                    m-1 / (m)))
         
-        transition_log[tt, cc] <- log(model_transition[(chains[tt,cc,id_pen] + 1), (chains[(tt-1), cc, id_pen] + 1)])
+        transition_log[tt, cc] <- log(model_transition[(chains[(tt-1), cc, id_pen] + 1), (chains[tt,cc,id_pen] + 1)])
         
         emissions_log[tt, cc] <-  log(vec_ind[tt,] %*% cond_jointprob[,(chains[tt, cc, id_pen] + 1)])
       }
     }
-    
-
-
   }
   
   em <- sum(emissions_log)
   
   ts <- sum(transition_log)
   
-  print(ts)
-  
-  print(em)
-  
-  print(priors)
-  
-  return(priors + ts + em)
-  
+  if(is.nan(priors + ts + em)){
+    return(-Inf)
+  }
+  else{
+    return(priors + ts + em)
+  }
 }

@@ -13,29 +13,53 @@
 # each parameter on a single row organized as alpha, beta, m. Dimensions should
 # be 3, 2.
 
-log_joint_post <- function(cr_theta, transitions, infected_totals,
-                           initial_theta){
+log_joint_post <- function(cr_theta, cr_chains, initial_theta){
   
-  trials <- dim(transitions)[1]
+  at <- exp(cr_theta[1])
+  bt <- exp(cr_theta[2])
   
-  n_pens <- dim(infected_totals)[2]
+  trials <- dim(cr_chains)[1]
   
-  # matrix to temporarily store values of the log joint posterior
-  tmp <- matrix(data = NA, nrow = trials - 1, ncol = n_pens)
+  n_pens <- dim(cr_chains)[2]
   
-  for(p in 1:n_pens){
-    for(t in 1:(trials-1)){
-      tmp[t, p] <- transitions[t, p, 1] * (- exp(cr_theta[1]) - exp(cr_theta[2]) * infected_totals[t, p]) +
-                   transitions[t, p, 2] * (log(1 - exp(- exp(cr_theta[1]) - exp(cr_theta[2]) * infected_totals[t, p]))) +
-                   transitions[t, p, 3] * (1 / (cr_theta[3] + 1)) + 
-                   transitions[t, p, 4] * (cr_theta[3] / (cr_theta[3] + 1))
+  tmp <- 0
+  
+  if(cr_theta[3]>0){
+    for(p in 1:n_pens){
+      
+      ind <- cr_chains[,,p]
+      
+      for(t in 1:(trials-1)){
+        
+        # transitions 0|0
+        n_00 <- length(ind[t,] == 0 & ind[t+1,] == 0)
+        
+        # transitions 1|0
+        n_01 <- length(ind[t,] == 0 & ind[t+1,] == 1)
+        
+        # transitions 0|1
+        n_10 <- length(ind[t,] == 1 & ind[t+1,] == 0)
+        
+        # transitions 1|1
+        n_11 <- length(ind[t,] == 1 & ind[t+1,] == 1)
+        
+        # number of infected at time t
+        infected <- length(ind[t,] == 1)
+        
+        tmp <- tmp + n_00 * (- at - bt * infected) + 
+          n_01 * log(1 - exp(- at - bt * infected)) -
+          (n_11 + n_10) * log(cr_theta[3] + 1) + 
+          n_11 * log(cr_theta[3])
+      }
     }
+    
+    ln_priors <- dgamma(x = at, shape = initial_theta[1, 1], rate = initial_theta[1, 2], log = TRUE) + log(at) +
+      dgamma(x = bt, shape = initial_theta[2, 1], rate = initial_theta[2, 2], log = TRUE) + log(bt) + 
+      dgamma(x = cr_theta[3], shape = initial_theta[3, 1], rate = initial_theta[3, 2], log = TRUE)
+    
+    return(tmp + ln_priors)
   }
-  
-  ln_priors <- dgamma(x = exp(cr_theta[1]), shape = initial_theta[1, 1], rate = initial_theta[1, 2]) +
-               dgamma(x = exp(cr_theta[2]), shape = initial_theta[2, 1], rate = initial_theta[2, 2]) +
-               dgamma(x = exp(cr_theta[3]), shape = initial_theta[3, 1], rate = initial_theta[3, 2])
-  
-  return(sum(tmp) + ln_priors + sum(cr_theta))
-  
+  else{
+    return(log(tmp))
+  }
 }

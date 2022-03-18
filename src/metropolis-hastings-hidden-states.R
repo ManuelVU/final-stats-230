@@ -57,9 +57,24 @@ mh_chain <- function(current_chains, tests_rams, tests_fec, cattle, pen, theta,
   
   log_u <- log(runif(n = 1))
   
-  a <- min(0, log_q_current - log_q_proposal + log_pi_proposal - log_pi_current)
+  a <- log_q_current - log_q_proposal + log_pi_proposal - log_pi_current
   
-  if(log_u <= a){
+  if(is.nan(a)){
+    if(log_q_current < log_q_proposal){
+      post_sample <- proposed_chain
+      log_q <- log_q_proposal
+      log_pi <- log_pi_proposal
+      accepted <- 1
+    }
+    else{
+      post_sample <- current_chains
+      log_q <- log_q_current
+      log_pi <- log_pi_current
+      accepted <- 0
+    }
+  }
+  
+  else if(log_u <= a){
     post_sample <- proposed_chain
     log_q <- log_q_proposal
     log_pi <- log_pi_proposal
@@ -75,7 +90,7 @@ mh_chain <- function(current_chains, tests_rams, tests_fec, cattle, pen, theta,
   
   results <- list()
   
-  reults$mhchain <- post_sample
+  results$mhchain <- post_sample
   results$log_q <- log_q
   results$log_pi <- log_pi
   results$accepted <- accepted
