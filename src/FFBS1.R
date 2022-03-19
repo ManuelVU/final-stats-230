@@ -4,31 +4,31 @@
 # a: external infection rate
 # b: with-in pen infection rate
 # m0: mean infectious period - 1
-# mu: initial probability of infection
+# nu: initial probability of infection
 # ObservedR, ObservedF: Observed test results for RAMS and faecal respectively
 # thetaR, thetaF : sensitivity of the RAMS and faecal test respectively
 # @OUtput of function: generated hidden states
-FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
+FFBS1<-function(a, b,m0, nu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF,id_pen){
   #forward filtering
-  I <- apply(X[-cow, ], 2, function(x) sum(x, na.rm = T))
-  s<-length(X[cow,])-sum(is.na(X[cow,]))
+  I <- apply(X[,-cow, id_pen], 1, function(x) sum(x, na.rm = T))
+  s<-length(X[,cow, id_pen])-sum(is.na(X[, cow, id_pen]))
   predictive.prob_X<-matrix(0,nrow = s,ncol = 2) #Compute the one-step ahead modified conditional predictive probabilities
   filtered.prob_X<-matrix(0,nrow = s,ncol = 2) #compute the modified conditional filtered prob
-  predictive.prob_X[1,]<-c(mu,1-mu)
+  predictive.prob_X[1,]<-c(nu,1-nu)
   prob1<-predictive.prob_X[1,1] # Xt=1
   #emission matrix:
   f<-matrix(0,nrow = 2,ncol = 4)
-  f[1,]<-c(thetaR*thetaF,thetaR*(1-thetaF),(1-thetaR)*thetaF,(1-thetaR)*(1-thetaF))
-  f[2,]<-c(f[1,4],f[1,3],f[1,2],f[1,1])  # y: (1,1),(1,0),(0,1),(0,0)
+  f[1,]<-c(thetaR*thetaF, thetaR*(1-thetaF), (1-thetaR)*thetaF, (1-thetaR)*(1-thetaF))
+  f[2,]<-c(0,0,0,1)  # y: (1,1),(1,0),(0,1),(0,0)
   
-  if(is.na(ObservedR[1])==FALSE){
-    if((ObservedR[1]==0)&(ObservedF[1]==0)){
+  if(is.na(ObservedR[1, cow, id_pen])==FALSE){
+    if((ObservedR[1, cow, id_pen]==0)&(ObservedF[1, cow, id_pen]==0)){
       no1<-prob1*f[1,4]  # x1=1，y1=(0，0)
       no2<-(1-prob1)*f[2,4] # x1=0,y1=(0,0)
-    }else if((ObservedR[1]==1)&(ObservedF[1]==0)){
+    }else if((ObservedR[1, cow, id_pen]==1)&(ObservedF[1, cow, id_pen]==0)){
       no1<-prob1*f[1,2]    # x1=1，y1=(1,0)
       no2<-(1-prob1)*f[2,2]  # x1=0，y1=(1,0)
-    }else if((ObservedR[1]==0)&(ObservedF[1]==1)){
+    }else if((ObservedR[1, cow, id_pen]==0)&(ObservedF[1, cow, id_pen]==1)){
       no1<-prob1*f[1,3]   # x1=1，y1=(0,1)
       no2<-(1-prob1)*f[2,3]  # x1=0，y1=(0,1)
     }else{
@@ -49,13 +49,13 @@ FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
     predictive.prob_X[i,2]<-filtered.prob_X[i-1,1]*p11+filtered.prob_X[i-1,2]*p00
     # Compute filtered prob
     if(is.na(ObservedR[i])==FALSE){
-      if((ObservedR[1]==0)&(ObservedF[1]==0)){
+      if((ObservedR[1, cow, id_pen]==0)&(ObservedF[1, cow, id_pen]==0)){
         no1<-predictive.prob_X[i,1]*f[1,4]  # x1=1，y1=(0，0)
         no2<-predictive.prob_X[i,2]*f[2,4] # x1=0,y1=(0,0)
-      }else if((ObservedR[1]==1)&(ObservedF[1]==0)){
+      }else if((ObservedR[1, cow, id_pen]==1)&(ObservedF[1, cow, id_pen]==0)){
         no1<-predictive.prob_X[i,1]*f[1,2]    # x1=1，y1=(1,0)
         no2<-predictive.prob_X[i,2]*f[2,2]  # x1=0，y1=(1,0)
-      }else if((ObservedR[1]==0)&(ObservedF[1]==1)){
+      }else if((ObservedR[1, cow, id_pen]==0)&(ObservedF[1, cow, id_pen]==1)){
         no1<-predictive.prob_X[i,1]*f[1,3]   # x1=1，y1=(0,1)
         no2<-predictive.prob_X[i,2]*f[2,3]  # x1=0，y1=(0,1)
       }else{
@@ -78,7 +78,7 @@ FFBS1<-function(a, b,m0, mu, cow, s, X,thetaR, thetaF, ObservedR, ObservedF){
     Hstate[s]<-1
     likelihood[s]<-filtered.prob_X[s,1]
   }else{
-    Hstate<-0
+    Hstate[s]<-0
     likelihood[s]<-filtered.prob_X[s,2]}
   for(i in (s-1):1){
     #transition prob 

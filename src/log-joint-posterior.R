@@ -32,19 +32,19 @@ log_joint_post <- function(cr_theta, cr_chains, initial_theta){
       for(t in 1:(trials-1)){
         
         # transitions 0|0
-        n_00 <- length(ind[t,] == 0 & ind[t+1,] == 0)
+        n_00 <- length(which(ind[t,] == 0 & ind[t+1,] == 0))
         
         # transitions 1|0
-        n_01 <- length(ind[t,] == 0 & ind[t+1,] == 1)
+        n_01 <- length(which(ind[t,] == 0 & ind[t+1,] == 1))
         
         # transitions 0|1
-        n_10 <- length(ind[t,] == 1 & ind[t+1,] == 0)
+        n_10 <- length(which(ind[t,] == 1 & ind[t+1,] == 0))
         
         # transitions 1|1
-        n_11 <- length(ind[t,] == 1 & ind[t+1,] == 1)
+        n_11 <- length(which(ind[t,] == 1 & ind[t+1,] == 1))
         
         # number of infected at time t
-        infected <- length(ind[t,] == 1)
+        infected <- length(which(ind[t,] == 1))
         
         tmp <- tmp + n_00 * (- at - bt * infected) + 
           n_01 * log(1 - exp(- at - bt * infected)) -
