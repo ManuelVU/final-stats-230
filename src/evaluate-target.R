@@ -95,10 +95,10 @@ pi_target2 <- function(chains, id_cow, id_pen, measures_rams, measures_fec, thet
   
   # evaluate log-likelihood of emissions
   
-  n_00 <- length(which(y_r == 0 & y_f == 0 & chain == 1))
-  n_01 <- length(which(y_r == 0 & y_f == 1 & chain == 1))
-  n_10 <- length(which(y_r == 1 & y_f == 0 & chain == 1))
-  n_11 <- length(which(y_r == 1 & y_f == 1 & chain == 1))
+  n_00 <- sum(y_r == 0 & y_f == 0 & chain == 1)
+  n_01 <- sum(y_r == 0 & y_f == 1 & chain == 1)
+  n_10 <- sum(y_r == 1 & y_f == 0 & chain == 1)
+  n_11 <- sum(y_r == 1 & y_f == 1 & chain == 1)
   
   llike_em <- n_00 * log((1 - theta_r) * (1 - theta_f)) +
               n_01 * log((1 - theta_r) * theta_f) +
