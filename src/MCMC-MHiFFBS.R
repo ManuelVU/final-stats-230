@@ -5,6 +5,8 @@ MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini
   source(file = "src/metropolis-hastings-hidden-states.R")
   source(file = "src/hamiltonian-mc.R")
   source(file = "src/TIP.R")
+  source(file = "src/gradient-log-joint.R")
+  source(file = "src/log-joint-posterior.R")
   # Initialization of parameters:
   a1<-ini_a
   b1<-ini_b
@@ -37,7 +39,7 @@ MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini
     }
     # HMC update  a,b,m
     theta_tilde<-c(log(a1),log(b1),m1-1)
-    initial_theta<-matrix(c(1,1,1,1,1,5),nrow = 3,ncol = 2,byrow = TRUE)
+    initial_theta<-matrix(c(1,1,1,1,1,10),nrow = 3,ncol = 2,byrow = TRUE)
     updated_theta<-hamiltonian_mc(u=log_joint_post,grad_u=gradient_log_joint_post,theta_tilde,initial_theta,X,30,0.03) 
     a1<-exp(updated_theta[1])
     b1<-exp(updated_theta[2])
@@ -71,15 +73,16 @@ MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini
     # Compute TIP
     tip[i]<-TIP(X)
   }
-  acceptance<-mean(accept)
-  ACF_TIP<-acf(tip,lag.max = 30)$acf
-  theta0<-matrix(c(a1,b1,m1,thetaR_new,thetaF_new),nrow = 1,ncol = 5)
-  colnames(theta)<-c("alpha","beta","m","thetaR","thetaF")
-  n_infected_est<-colMeans(n_infected)
+  effective<-c((burning+1):N)
+  acceptance<-mean(accept[effective])
+  ACF_TIP<-acf(tip[effective],lag.max = 30)$acf
+  theta0<-matrix(c(a1,b1,m1,thetaR,thetaF),nrow = 1,ncol = 5)
+  colnames(theta0)<-c("alpha","beta","m","thetaR","thetaF")
+  n_infected_est<-colMeans(n_infected[effective,])
   CI_lower<-c();CI_upper<-c()
   for(i in 1:n_day){
-    CI_lower[i]<-quantile(n_infected[,i],0.025,na.rm = TRUE)
-    CI_upper[i]<-quantile(n_infected[,i],0.975,na.rm = TRUE)
+    CI_lower[i]<-quantile(n_infected[effective,i],0.025,na.rm = TRUE)
+    CI_upper[i]<-quantile(n_infected[effective,i],0.975,na.rm = TRUE)
   }
   N_infected<-cbind(n_infected_est,CI_lower,CI_upper)
   result<-list(theta0,acceptance,N_infected,tip,ACF_TIP)
@@ -87,5 +90,5 @@ MCMC_MHiFFBS<-function(N,burning,ObservedR,ObservedF,n_Pen,n_cow,ini_a,ini_b,ini
   return(result)
 }
 
-output<-MCMC_MHiFFBS(50,100,ObservedR,ObservedF,20,8,0.02,0.03,3,0.9,0.95,0.3)
+output<-MCMC_MHiFFBS(50,20,sis_data$resp$rams,sis_data$resp$fec,20,8,0.02,0.03,3,0.9,0.95,0.3)
 save(output, file = "data/output.Rdata")
